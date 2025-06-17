@@ -1,14 +1,14 @@
 SetFactory("OpenCASCADE");
 Geometry.OCCScaling=0.001;
-Merge "e4.step";
+Merge "e4-2.step";
 //+
-Physical Surface("AllSurface", 37) = {9, 4, 8, 7, 5, 1, 6, 3, 2, 14, 13, 12, 10, 11};
+Physical Surface("AllSurface", 37) = {13, 9, 6, 7, 5, 11, 12, 8, 10, 4, 3, 2, 14, 1};
 //+
-Physical Surface("InSurface", 38) = {2, 3, 4, 8, 9, 7, 5, 1, 6};
+Physical Surface("InSurface", 38) = {5, 7, 6, 9, 13, 11, 10, 8, 12};
 //+
-Physical Surface("OutSurface", 39) = {11};
+Physical Surface("OutSurface", 39) = {2, 3, 4};
 //+
-Physical Surface("Symmetry", 40) = {14, 13};
+Physical Surface("Symmetry", 40) = {1, 14};
 //+
 Physical Volume("AllVolume", 41) = {1};
 
@@ -38,4 +38,4 @@ Mesh.MeshSizeFromCurvature = 50;      // 曲率自适应强度（0-100）
 
 // 生成网格
 Mesh 3;  // 或 Mesh 3 生成三维网格
-Save "e4_mesh.msh";
+Save "e4-2_mesh.msh";
