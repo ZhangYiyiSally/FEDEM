@@ -56,7 +56,9 @@ if __name__ == '__main__':
     max_iter_LBFGS=cfg.max_iter_LBFGS
         
     # 定义优化器
-    optimizer_LBFGS = torch.optim.LBFGS(dem.parameters(), lr=learning_rate_LBFGS, max_iter=max_iter_LBFGS)
+    # optimizer_LBFGS = torch.optim.LBFGS(dem.parameters(), lr=learning_rate_LBFGS, max_iter=max_iter_LBFGS)
+    optimizer_Adam = torch.optim.Adam(dem.parameters(), lr=cfg.learning_rate_Adam, foreach=True)
+    scheduler = torch.optim.lr_scheduler.ExponentialLR(optimizer_Adam, gamma=cfg.gamma)
 
     print(f"开始训练：共{epoch_num}个epoch，学习率{learning_rate_LBFGS}")
     tqdm_epoch = tqdm(range(epoch_num), desc='epoches',colour='red', dynamic_ncols=True)
@@ -65,24 +67,28 @@ if __name__ == '__main__':
         xyz_field = xyz_field.to(dev)
         xyz_field.requires_grad = True  # 为了计算位移场的梯度，这里需要设置为True
 
-        def closure():
-            loss2=Loss(dem)
-            loss_closure=loss2.loss_function(xyz_field, bc_Dir, bc_Neu, [cfg.Length, cfg.Width, cfg.Height], [cfg.Width, cfg.Height])
-            losses.append(loss_closure.item())
-            eL2.append(util.errorL2(dem, dom, dev).item())
-            eH1.append(util.errorH1(dem, dom, dev).item())# 反向传播
-            optimizer_LBFGS.zero_grad()
-            loss_closure.backward()
-            # print('Iter: %d Loss: %.9e '% (epoch + 1, loss_closure.item()))
-            return loss_closure
+        # def closure():
+        #     loss2=Loss(dem)
+        #     loss_closure=loss2.loss_function(xyz_field, bc_Dir, bc_Neu, [cfg.Length, cfg.Width, cfg.Height], [cfg.Width, cfg.Height])
+        #     losses.append(loss_closure.item())
+        #     eL2.append(util.errorL2(dem, dom, dev).item())
+        #     eH1.append(util.errorH1(dem, dom, dev).item())# 反向传播
+        #     optimizer_LBFGS.zero_grad()
+        #     loss_closure.backward()
+        #     # print('Iter: %d Loss: %.9e '% (epoch + 1, loss_closure.item()))
+        #     return loss_closure
             
-        optimizer_LBFGS.step(closure=closure)
-        # # 线性地减小学习率
-        # for param_group in optimizer_LBFGS.param_groups:
-        #     t=epoch/epoch_num
-        #     startDrop=0.0
-        #     dropTo=0.05
-        #     param_group['lr'] = learning_rate_LBFGS*min(1,1-(1-dropTo)/(1-startDrop)*(t-startDrop))
+        # optimizer_LBFGS.step(closure=closure)
+        # 计算损失函数
+        loss=Loss(dem)
+        loss_value=loss.loss_function(xyz_field, bc_Dir, bc_Neu, [cfg.Length, cfg.Width, cfg.Height], [cfg.Width, cfg.Height])
+        # losses.append(loss_value.item())
+        eL2.append(util.errorL2(dem, dom, dev).item())
+        eH1.append(util.errorH1(dem, dom, dev).item())
+        # 反向传播
+        optimizer_Adam.zero_grad()
+        loss_value.backward()
+        optimizer_Adam.step()
         
 
         # 更新epoch进度条
