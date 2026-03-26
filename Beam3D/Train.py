@@ -52,42 +52,43 @@ if __name__ == '__main__':
     eL2=[]
     eH1=[]
     epoch_num=cfg.epoch_num
-    learning_rate_AdamW=cfg.learning_rate_AdamW
+    learning_rate_Adam=cfg.learning_rate_Adam
     learning_rate_LBFGS=cfg.learning_rate_LBFGS
     max_iter_LBFGS=cfg.max_iter_LBFGS
         
     # 定义优化器
-    optimizer_AdamW = torch.optim.AdamW(dem.parameters(), lr=learning_rate_AdamW, foreach=True)
+    optimizer_Adam = torch.optim.Adam(dem.parameters(), lr=learning_rate_Adam, foreach=True)
+    scheduler = torch.optim.lr_scheduler.ExponentialLR(optimizer_Adam, gamma=cfg.gamma)
     optimizer_LBFGS = torch.optim.LBFGS(dem.parameters(), lr=learning_rate_LBFGS, max_iter=max_iter_LBFGS)
 
     print(f"开始训练：共{epoch_num}个epoch，学习率{learning_rate_LBFGS}")
     tqdm_epoch = tqdm(range(epoch_num), desc='epoches',colour='red', dynamic_ncols=True)
     for epoch in range(epoch_num):
 
-        # # 计算损失函数
-        # loss=Loss(dem)
-        # loss_value=loss.loss_function(dom, bc_Dir, bc_Neu)
-        # # losses.append(loss_value.item())
-        # eL2.append(util.errorL2(dem, mesh.points, dev).item())
-        # eH1.append(util.errorH1(dem, mesh.points, dev).item())
-        # # 反向传播
-        # optimizer_AdamW.zero_grad()
-        # loss_value.backward()
-        # optimizer_AdamW.step()
+        # 计算损失函数
+        loss=Loss(dem)
+        loss_value=loss.loss_function(dom, bc_Dir, bc_Neu)
+        # losses.append(loss_value.item())
+        eL2.append(util.errorL2(dem, mesh.points, dev).item())
+        eH1.append(util.errorH1(dem, mesh.points, dev).item())
+        # 反向传播
+        optimizer_Adam.zero_grad()
+        loss_value.backward()
+        optimizer_Adam.step()
 
-        def closure():
-            loss=Loss(dem)
-            loss_closure=loss.loss_function(dom, bc_Dir, bc_Neu)
-            losses.append(loss_closure.item())
-            eL2.append(util.errorL2(dem, mesh.points, dev).item())
-            eH1.append(util.errorH1(dem, mesh.points, dev).item())
-            # 反向传播
-            optimizer_LBFGS.zero_grad()
-            loss_closure.backward()
-            return loss_closure
+        # def closure():
+        #     loss=Loss(dem)
+        #     loss_closure=loss.loss_function(dom, bc_Dir, bc_Neu)
+        #     losses.append(loss_closure.item())
+        #     eL2.append(util.errorL2(dem, mesh.points, dev).item())
+        #     eH1.append(util.errorH1(dem, mesh.points, dev).item())
+        #     # 反向传播
+        #     optimizer_LBFGS.zero_grad()
+        #     loss_closure.backward()
+        #     return loss_closure
             
             
-        optimizer_LBFGS.step(closure=closure)
+        # optimizer_LBFGS.step(closure=closure)
 
 
         # 更新epoch进度条
