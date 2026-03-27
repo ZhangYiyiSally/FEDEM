@@ -37,7 +37,7 @@ if __name__ == '__main__':
     mesh = meshio.read(cfg.mesh_path, file_format="gmsh")
     data=Dataset()
     dom=data.domain(mesh)
-    print("加载网络:" % cfg.mesh_path)
+    print(f"加载网络:{cfg.mesh_path}")
 
     bc_Dir=data.bc_Dirichlet('bc_Dirichlet')
     bc_Neu=data.bc_Neumann('bc_Neumann')
