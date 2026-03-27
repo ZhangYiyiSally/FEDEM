@@ -13,8 +13,8 @@ import Utility as util
 
 def plot_loss(loss, error):
     # 绘制损失曲线
-    # plt.clf()
-    # plt.figure(1)
+    plt.figure(1)
+    plt.clf()
     plt.plot(loss, linewidth=2, color='firebrick')
     plt.plot(error, linewidth=2, color='blue')
     plt.tick_params(axis='both', size=5, width=2,
@@ -51,12 +51,11 @@ if __name__ == '__main__':
     losses = []
     eL2=[]
     eH1=[]
-    epoch_num=cfg.epoch_num
     learning_rate_LBFGS=cfg.learning_rate_LBFGS
-    max_iter_LBFGS=cfg.max_iter_LBFGS
+    epoch_num=cfg.epoch_num
         
     # 定义优化器
-    # optimizer_LBFGS = torch.optim.LBFGS(dem.parameters(), lr=learning_rate_LBFGS, max_iter=max_iter_LBFGS)
+    optimizer_LBFGS = torch.optim.LBFGS(dem.parameters(), lr=learning_rate_LBFGS, max_iter=cfg.max_iter_LBFGS)
     optimizer_Adam = torch.optim.Adam(dem.parameters(), lr=cfg.learning_rate_Adam, foreach=True)
     scheduler = torch.optim.lr_scheduler.ExponentialLR(optimizer_Adam, gamma=cfg.gamma)
 
@@ -67,29 +66,29 @@ if __name__ == '__main__':
         xyz_field = xyz_field.to(dev)
         xyz_field.requires_grad = True  # 为了计算位移场的梯度，这里需要设置为True
 
-        # def closure():
-        #     loss2=Loss(dem)
-        #     loss_closure=loss2.loss_function(xyz_field, bc_Dir, bc_Neu, [cfg.Length, cfg.Width, cfg.Height], [cfg.Width, cfg.Height])
-        #     losses.append(loss_closure.item())
-        #     eL2.append(util.errorL2(dem, dom, dev).item())
-        #     eH1.append(util.errorH1(dem, dom, dev).item())# 反向传播
-        #     optimizer_LBFGS.zero_grad()
-        #     loss_closure.backward()
-        #     # print('Iter: %d Loss: %.9e '% (epoch + 1, loss_closure.item()))
-        #     return loss_closure
-            
-        # optimizer_LBFGS.step(closure=closure)
-        # 计算损失函数
-        loss=Loss(dem)
-        loss_value=loss.loss_function(xyz_field, bc_Dir, bc_Neu, [cfg.Length, cfg.Width, cfg.Height], [cfg.Width, cfg.Height])
-        # losses.append(loss_value.item())
-        eL2.append(util.errorL2(dem, dom, dev).item())
-        eH1.append(util.errorH1(dem, dom, dev).item())
-        # 反向传播
-        optimizer_Adam.zero_grad()
-        loss_value.backward()
-        optimizer_Adam.step()
-        
+        if epoch < epoch_num*cfg.beta:
+            # 计算损失函数
+            loss=Loss(dem)
+            loss_value=loss.loss_function(xyz_field, bc_Dir, bc_Neu, [cfg.Length, cfg.Width, cfg.Height], [cfg.Width, cfg.Height])
+            # losses.append(loss_value.item())
+            eL2.append(util.errorL2(dem, dom, dev).item())
+            eH1.append(util.errorH1(dem, dom, dev).item())
+            # 反向传播
+            optimizer_Adam.zero_grad()
+            loss_value.backward()
+            optimizer_Adam.step()
+        else:
+            def closure():
+                loss=Loss(dem)
+                loss_closure=loss.loss_function(xyz_field, bc_Dir, bc_Neu, [cfg.Length, cfg.Width, cfg.Height], [cfg.Width, cfg.Height])
+                # losses.append(loss_value.item())
+                eL2.append(util.errorL2(dem, dom, dev).item())
+                eH1.append(util.errorH1(dem, dom, dev).item())
+                # 反向传播
+                optimizer_LBFGS.zero_grad()
+                loss_closure.backward()
+                return loss_closure
+            optimizer_LBFGS.step(closure=closure)
 
         # 更新epoch进度条
         tqdm_epoch.update()

@@ -3,13 +3,13 @@ import matplotlib.pyplot as plt
 import Config as cfg
 
 # 绘制训练步骤
-range_x=800
+range_x=2000
 steps = np.arange(1, range_x+1)
 
 # 生成三个种子的训练数据（假设为损失值）
-FEMPINN_eL2_1=np.loadtxt("Beam3D/Results/mesh4245/int2/errorL2_seed2024.txt")  # 种子1的误差值
-FEMPINN_eL2_2=np.loadtxt("Beam3D/Results/mesh4245/int2/errorL2_seed2025.txt")  # 种子2的误差值
-FEMPINN_eL2_3=np.loadtxt("Beam3D/Results/mesh4245/int2/errorL2_seed2026.txt")  # 种子3的误差值
+FEMPINN_eL2_1=np.loadtxt("Beam3D/Results/mesh4245/int2/errorL2_seed2024.txt")[:range_x,]  # 种子1的误差值
+FEMPINN_eL2_2=np.loadtxt("Beam3D/Results/mesh4245/int2/errorL2_seed2025.txt")[:range_x,]  # 种子2的误差值
+FEMPINN_eL2_3=np.loadtxt("Beam3D/Results/mesh4245/int2/errorL2_seed2026.txt")[:range_x,]  # 种子3的误差值
 
 PINN_eL2_1=np.loadtxt("DEM3D/Results/mesh40x10x10/errorL2_seed2024.txt")[:range_x,]  # 种子1的误差值
 PINN_eL2_2=np.loadtxt("DEM3D/Results/mesh40x10x10/errorL2_seed2025.txt")[:range_x,]  # 种子2的误差值

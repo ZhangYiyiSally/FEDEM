@@ -24,9 +24,10 @@ hidden_size=64  # ResNet的隐藏层大小
 output_size=3  # ResNet的输出大小
 depth=4  # ResNet的深度
 #--------------------------------训练参数设置-----------------------------------------
-epoch_num=1200  # 训练的epoch数
-learning_rate_Adam=0.001  #  Adam的学习率
-gamma=0.999
+epoch_num=2200  # 训练的epoch数
+beta=1
+learning_rate_Adam=0.0005  #  Adam的学习率
+gamma=0.99
 learning_rate_LBFGS=0.2  # LBFGS的学习率
 max_iter_LBFGS=20  # LBFGS的最大迭代次数
 

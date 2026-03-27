@@ -13,8 +13,8 @@ import Utility as util
 
 def plot_loss(loss, error):
     # 绘制损失曲线
-    # plt.clf()
-    # plt.figure(1)
+    plt.figure(1)
+    plt.clf()
     plt.plot(loss, linewidth=2, color='firebrick')
     plt.plot(error, linewidth=2, color='blue')
     plt.tick_params(axis='both', size=5, width=2,
@@ -26,7 +26,7 @@ def plot_loss(loss, error):
     plt.grid(color='midnightblue', linestyle='-.', linewidth=0.5)
     # 调整坐标轴的边框样式
     for spine in plt.gca().spines.values():
-        spine.set_linewidth(2)  # 设置边框宽度为2
+        spine.set_linewidth(2)  # 设置边框宽度
     plt.pause(0.0001)
 
 
@@ -37,7 +37,7 @@ if __name__ == '__main__':
     mesh = meshio.read(cfg.mesh_path, file_format="gmsh")
     data=Dataset()
     dom=data.domain(mesh)
-    print("加载网络：%s" % cfg.mesh_path)
+    print("加载网络:" % cfg.mesh_path)
 
     bc_Dir=data.bc_Dirichlet('bc_Dirichlet')
     bc_Neu=data.bc_Neumann('bc_Neumann')
@@ -46,7 +46,7 @@ if __name__ == '__main__':
     dem=ResNet(cfg.input_size, cfg.hidden_size, cfg.output_size, cfg.depth).to(dev)
     dem.train()
 
-    # 开始训练, 设置训练参数
+    # 开始训�? 设置训练参数
     start_time = time.time()
     losses = []
     eL2=[]
@@ -56,7 +56,7 @@ if __name__ == '__main__':
     learning_rate_LBFGS=cfg.learning_rate_LBFGS
     max_iter_LBFGS=cfg.max_iter_LBFGS
         
-    # 定义优化器
+    # 定义优化�?
     optimizer_Adam = torch.optim.Adam(dem.parameters(), lr=learning_rate_Adam, foreach=True)
     scheduler = torch.optim.lr_scheduler.ExponentialLR(optimizer_Adam, gamma=cfg.gamma)
     optimizer_LBFGS = torch.optim.LBFGS(dem.parameters(), lr=learning_rate_LBFGS, max_iter=max_iter_LBFGS)
@@ -64,37 +64,38 @@ if __name__ == '__main__':
     print(f"开始训练：共{epoch_num}个epoch，学习率{learning_rate_LBFGS}")
     tqdm_epoch = tqdm(range(epoch_num), desc='epoches',colour='red', dynamic_ncols=True)
     for epoch in range(epoch_num):
+        if epoch < epoch_num*cfg.beta:
 
-        # 计算损失函数
-        loss=Loss(dem)
-        loss_value=loss.loss_function(dom, bc_Dir, bc_Neu)
-        # losses.append(loss_value.item())
-        eL2.append(util.errorL2(dem, mesh.points, dev).item())
-        eH1.append(util.errorH1(dem, mesh.points, dev).item())
-        # 反向传播
-        optimizer_Adam.zero_grad()
-        loss_value.backward()
-        optimizer_Adam.step()
+            # 计算损失函数
+            loss=Loss(dem)
+            loss_value=loss.loss_function(dom, bc_Dir, bc_Neu)
+            # losses.append(loss_value.item())
+            eL2.append(util.errorL2(dem, mesh.points, dev).item())
+            eH1.append(util.errorH1(dem, mesh.points, dev).item())
+            # 反向传播
+            optimizer_Adam.zero_grad()
+            loss_value.backward()
+            optimizer_Adam.step()
 
-        # def closure():
-        #     loss=Loss(dem)
-        #     loss_closure=loss.loss_function(dom, bc_Dir, bc_Neu)
-        #     losses.append(loss_closure.item())
-        #     eL2.append(util.errorL2(dem, mesh.points, dev).item())
-        #     eH1.append(util.errorH1(dem, mesh.points, dev).item())
-        #     # 反向传播
-        #     optimizer_LBFGS.zero_grad()
-        #     loss_closure.backward()
-        #     return loss_closure
+        else:
+            def closure():
+                loss=Loss(dem)
+                loss_closure=loss.loss_function(dom, bc_Dir, bc_Neu)
+                # losses.append(loss_closure.item())
+                eL2.append(util.errorL2(dem, mesh.points, dev).item())
+                eH1.append(util.errorH1(dem, mesh.points, dev).item())
+                # 反向传播
+                optimizer_LBFGS.zero_grad()
+                loss_closure.backward()
+                return loss_closure
             
-            
-        # optimizer_LBFGS.step(closure=closure)
+            optimizer_LBFGS.step(closure=closure)
 
-
-        # 更新epoch进度条
+        # 更新epoch进度�?
         tqdm_epoch.update()
         tqdm_epoch.set_postfix(errorL2='{:.5f}'.format(eL2[-1]))
         plot_loss(losses, eL2)
+
 
 
     # 保存模型
