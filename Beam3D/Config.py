@@ -24,7 +24,7 @@ hidden_size=64  # ResNet的隐藏层大小
 output_size=3  # ResNet的输出大小
 depth=4  # ResNet的深度
 #--------------------------------训练参数设置-----------------------------------------
-epoch_num=2200  # 训练的epoch数
+epoch_num=3000  # 训练的epoch数
 beta=1
 learning_rate_Adam=0.0005  #  Adam的学习率
 gamma=0.99
