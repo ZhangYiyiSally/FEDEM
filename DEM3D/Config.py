@@ -48,4 +48,4 @@ max_iter_LBFGS=20  # Maximum iterations for LBFGS
 
 #---------------------------Output save paths----------------------------------
 model_save_path=f"DEM3D/Results/{integration_method}/mesh{Nx}x{Ny}x{Nz}"
-Evaluate_save_path=f"DEM3D/Results/{integration_method}/mesh{Nx}x{Ny}x{Nz}/NeoHook_{depth}Layer_mesh{Nx*Ny*Nz}_iter{epoch_num}_lr{learning_rate_Adam}_mont"
+Evaluate_save_path=f"DEM3D/Results/{integration_method}/mesh{Nx}x{Ny}x{Nz}/NeoHook_{depth}Layer_mesh{Nx*Ny*Nz}_iter{epoch_num}_lr{learning_rate_LBFGS}_mont"
